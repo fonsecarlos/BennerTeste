@@ -1,0 +1,94 @@
+﻿@model Microwave.Models.MicrowaveModel
+
+<!DOCTYPE html>
+<html>
+
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+<script type='text/javascript'>
+    $(document).ready(function () {
+        $("#iniciar").click(function () {
+
+            var model = $("#formMicroondas").serialize();
+            $.ajax({
+                url: "/Microwave/Iniciar",
+                type: "POST",
+                data: model
+            }).done(function (res) {
+                $('#resultado').html(res);
+            });
+        });
+
+        $("#Programa").change(function () {
+
+            if ($(this).val() != 0) {
+                var model = $("#formMicroondas").serialize();
+                $.ajax({
+                    url: "/Microwave/BuscaDescricao",
+                    type: "POST",
+                    data: model
+                }).done(function (res) {
+                    $('#descricao').html("<p>" + res + "</p>");
+                });
+            }
+            else {
+                $('#descricao').html("<p></p>");
+            }
+
+        });
+
+        $("#salvar").click(function () {
+            var model = $("#formMicroondas").serialize();
+            $.ajax({
+                url: "/Microwave/SalvaPrograma",
+                type: "POST",
+                data: model
+            }).done(function (res) {
+                $('#Programa').append($('<option>', {
+                    value: res.Value,
+                    text: res.Text
+                }));
+            });
+        });
+    });
+
+</script>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+</head>
+<body>
+
+    @{Html.BeginForm(null, null, FormMethod.Post, new { id = "formMicroondas" }); }
+    @Html.HiddenFor(x => Model.Identificador)
+    @Html.LabelFor(x => Model.Entrada)
+    @Html.TextBoxFor(x => Model.Entrada)
+    @Html.LabelFor(x => Model.SimulaTempo)
+    @Html.CheckBoxFor(x => Model.SimulaTempo)
+    <br />
+    @Html.LabelFor(x => Model.ProgramaSelecionado)
+    @Html.DropDownListFor(x => Model.ProgramaSelecionado, new SelectList(Model.ListaProgramas, "Value", "Text"), htmlAttributes: new { @class = "form-control", id = "Programa" })
+    @{Html.EndForm();}
+    <button id="iniciar">Iniciar</button>
+    <button id="salvar">Salvar Programa</button>
+
+    <div id="descricao"></div>
+
+    <br />
+    <div id="resultado"></div>
+
+    <div>
+        <h3>Mode de uso:</h3>
+        <p>A entrada deve ser uma String no formato: [alimento] [tempo (mm:ss)] [potencia]<br/>Digite a entrada e aperte Iniciar que o alimento será aquecido.</p>
+        <br/>
+        <p>Existem programas pré-definidos, para utilizá-los coloque o alimento correspondente, selecione o programa e clique em Iniciar</p>
+        <br />
+        <p>Para adicionar novos programas coloque na Entrada uma string no seguinte formato: [Alimento] [tempo (mm:ss)] [potência] [caracter de aquecimento] e clique em Salvar Programa</p>
+        <br/>
+        <p>Se quiser que o programa simule o tempo real, marque a checkbox de Simular Tempo</p>
+
+    </div>
+
+</body>
